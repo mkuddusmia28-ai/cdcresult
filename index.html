@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>Student Search</title>
 
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 <style>
 body{
     font-family: Arial;
@@ -11,9 +13,7 @@ body{
     text-align:center;
 }
 
-.container{
-    margin-top:40px;
-}
+.container{ margin-top:40px; }
 
 input{
     padding:10px;
@@ -56,39 +56,27 @@ const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6XYX-1NbB9VaFLmWK
 
 let students = [];
 
-// 🔥 CLEAN CSV PARSER (FIXED)
-async function loadData(){
-    const res = await fetch(url + "&t=" + new Date().getTime());
-    const text = await res.text();
+// 🔥 PERFECT CSV LOADER
+function loadData(){
 
-    let rows = text.trim().split("\n");
+    Papa.parse(url, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results){
 
-    // header clean করা
-    let headers = rows[0].split(",").map(h => h.trim().replace(/\r/g,""));
+            students = results.data;
+            console.log("DATA LOADED:", students);
+        }
+    });
 
-    students = [];
-
-    for(let i=1;i<rows.length;i++){
-
-        let values = rows[i].split(",");
-
-        let obj = {};
-
-        headers.forEach((h,i2)=>{
-            obj[h] = values[i2] ? values[i2].trim() : "N/A";
-        });
-
-        students.push(obj);
-    }
 }
 
-// 🔍 SEARCH FIXED
+// 🔍 SEARCH
 function search(){
 
     let roll = document.getElementById("roll").value.trim();
     let result = document.getElementById("result");
-
-    console.log(students); // debug
 
     let s = students.find(x => String(x["ROLL"]).trim() == roll);
 
