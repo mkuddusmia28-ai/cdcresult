@@ -2,67 +2,42 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>শিক্ষার্থীর ফলাফল</title>
+<title>Student Search System</title>
 
 <style>
 body{
-    font-family: SolaimanLipi, Arial, sans-serif;
-    background:#f4f6f9;
-    margin:0;
-    padding:20px;
-}
-.container{
-    max-width:800px;
-    margin:auto;
-    background:#fff;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 0 15px rgba(0,0,0,.1);
-}
-h1{
+    font-family: Arial;
+    background:#f4f4f4;
     text-align:center;
-    color:#0066cc;
 }
+
+.container{
+    margin-top:40px;
+}
+
 input{
-    width:70%;
-    padding:12px;
+    padding:10px;
+    width:250px;
     border:1px solid #ccc;
-    border-radius:8px;
+    border-radius:5px;
 }
+
 button{
-    padding:12px 20px;
-    background:#0066cc;
-    color:#fff;
+    padding:10px 15px;
+    background:#28a745;
+    color:white;
     border:none;
-    border-radius:8px;
+    border-radius:5px;
     cursor:pointer;
 }
-button:hover{
-    background:#004c99;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:15px;
-}
-table,th,td{
-    border:1px solid #ddd;
-}
-th,td{
-    padding:10px;
-    text-align:center;
-}
-th{
-    background:#0066cc;
-    color:white;
-}
-.result{
+
+.card{
+    background:white;
+    display:inline-block;
     margin-top:20px;
-}
-.info{
-    font-size:18px;
-    line-height:1.8;
+    padding:20px;
+    border-radius:10px;
+    text-align:left;
 }
 </style>
 </head>
@@ -70,84 +45,84 @@ th{
 <body>
 
 <div class="container">
-<h1>📘 শিক্ষার্থীর ফলাফল</h1>
+    <h2>Student Result Search</h2>
 
-<center>
-<input type="text" id="roll" placeholder="রোল নম্বর লিখুন">
-<button onclick="searchResult()">ফলাফল দেখুন</button>
-</center>
+    <input type="text" id="roll" placeholder="Enter Roll">
+    <button onclick="searchStudent()">Search</button>
 
-<div id="result" class="result"></div>
-
+    <div id="result"></div>
 </div>
 
 <script>
-const csvUrl =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6XYX-1NbB9VaFLmWKAi_Qjd5wy3_vWTTvPhP6kSW6eYZB-eGEhjT2mOiPQeSrZI7jRjUcf5uI_QuW/pub?gid=0&single=true&output=csv";
 
-let students=[];
+let students = [];
 
-fetch(csvUrl)
-.then(r=>r.text())
-.then(data=>{
-    const rows=data.trim().split("\n");
-    const headers=rows[0].split(",");
+// 🔴 তোমার Google Sheet CSV link এখানে দাও
+const url = "PASTE_YOUR_CSV_LINK_HERE";
 
-    for(let i=1;i<rows.length;i++){
-        const values=rows[i].split(",");
-        let obj={};
-        headers.forEach((h,index)=>{
-            obj[h.trim()]=values[index]?.trim();
-        });
-        students.push(obj);
+// 🔥 data load function (AUTO UPDATE)
+async function loadData(){
+    try{
+        const res = await fetch(url + "&t=" + new Date().getTime());
+        const text = await res.text();
+
+        let rows = text.trim().split("\n");
+        let headers = rows[0].split(",");
+
+        students = [];
+
+        for(let i=1;i<rows.length;i++){
+            let values = rows[i].split(",");
+            let obj = {};
+
+            headers.forEach((h,index)=>{
+                obj[h.trim()] = values[index] ? values[index].trim() : "N/A";
+            });
+
+            students.push(obj);
+        }
+
+    }catch(err){
+        console.log("Data load error:",err);
     }
-});
-
-function searchResult(){
-
-const roll=document.getElementById("roll").value.trim();
-
-const student=students.find(
-s=>s["রোল"]==roll
-);
-
-const result=document.getElementById("result");
-
-if(!student){
-result.innerHTML="<h3 style='color:red'>ফলাফল পাওয়া যায়নি</h3>";
-return;
 }
 
-result.innerHTML=`
+// 🔥 search function
+function searchStudent(){
 
-<div class="info">
-<b>নাম:</b> ${student["নাম"]}<br>
-<b>রোল:</b> ${student["রোল"]}<br>
-<b>বিভাগ:</b> ${student["বিভাগ"]}
-</div>
+    let roll = document.getElementById("roll").value.trim();
+    let result = document.getElementById("result");
 
-<table>
-<tr>
-<th>বিষয়</th>
-<th>নম্বর</th>
-</tr>
+    let s = students.find(x => x["ROLL"] == roll);
 
-<tr><td>বাংলা</td><td>${student["বাংলা"]}</td></tr>
-<tr><td>ইংরেজি</td><td>${student["ইংরেজি"]}</td></tr>
-<tr><td>আইসিটি</td><td>${student["আইসিটি"]}</td></tr>
-<tr><td>হিসাববিজ্ঞান</td><td>${student["হিসাববিজ্ঞান"]}</td></tr>
-<tr><td>ব্যবসায় সংগঠন</td><td>${student["ব্যবসায় সংগঠন"]}</td></tr>
-<tr><td>ব্যবস্থাপনা</td><td>${student["ব্যবস্থাপনা"]}</td></tr>
-<tr><td>ফিন্যান্স ব্যাংকিং</td><td>${student["ফিন্যান্স ব্যাংকিং"]}</td></tr>
+    if(!s){
+        result.innerHTML = "<p style='color:red'>কোনো ডাটা পাওয়া যায়নি</p>";
+        return;
+    }
 
-<tr>
-<th>মোট</th>
-<th>${student["মোট"]}</th>
-</tr>
-
-</table>
-`;
+    result.innerHTML = `
+    <div class="card">
+        <h3>নাম: ${s["CANDIDATE'S NAME"] || "N/A"}</h3>
+        <p>রোল: ${s["ROLL"] || "N/A"}</p>
+        <p>বিভাগ: ${s["GROUP TYPE"] || "N/A"}</p>
+        <p>বাংলা: ${s["বাংলা"] || "N/A"}</p>
+        <p>ইংরেজি: ${s["ইংরেজি"] || "N/A"}</p>
+        <p>আইসিটি: ${s["আইসিটি"] || "N/A"}</p>
+        <p>হিসাববিজ্ঞান: ${s["হিসাববিজ্ঞান"] || "N/A"}</p>
+        <p>ব্যবসায় সংগঠন: ${s["ব্যবসায় সংগঠন"] || "N/A"}</p>
+        <p>ব্যবস্থাপনা: ${s["ব্যবস্থাপনা"] || "N/A"}</p>
+        <p>ফিন্যান্স ব্যাংকিং: ${s["ফিন্যান্স ব্যাংকিং"] || "N/A"}</p>
+        <h3>মোট: ${s["মোট"] || "N/A"}</h3>
+    </div>
+    `;
 }
+
+// 🔥 page load হলে data আসবে
+loadData();
+
+// 🔥 auto refresh (Google Sheet update detect)
+setInterval(loadData, 10000); // প্রতি 10 সেকেন্ডে update check করবে
+
 </script>
 
 </body>
