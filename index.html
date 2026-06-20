@@ -1,110 +1,32 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Student Search</title>
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<style>
-body{
-    font-family: Arial;
-    background:#f2f2f2;
-    text-align:center;
-}
-
-.container{ margin-top:40px; }
-
-input{
-    padding:10px;
-    width:250px;
-}
-
-button{
-    padding:10px 15px;
-    background:green;
-    color:white;
-    border:none;
-    cursor:pointer;
-}
-
-.card{
-    background:white;
-    padding:20px;
-    margin-top:20px;
-    display:inline-block;
-    text-align:left;
-    border-radius:10px;
-}
-</style>
+  <title>CSV Data</title>
 </head>
-
 <body>
 
-<div class="container">
-<h2>Student Result Search</h2>
-
-<input type="text" id="roll" placeholder="রোল লিখো">
-<button onclick="search()">Search</button>
-
-<div id="result"></div>
-</div>
+<h2>Student Data</h2>
+<div id="output"></div>
 
 <script>
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6XYX-1NbB9VaFLmWKAi_Qjd5wy3_vWTTvPhP6kSW6eYZB-eGEhjT2mOiPQeSrZI7jRjUcf5uI_QuW/pub?output=csv")
+.then(res => res.text())
+.then(data => {
+    let rows = data.split("\n");
+    let html = "<table border='1'>";
 
-const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6XYX-1NbB9VaFLmWKAi_Qjd5wy3_vWTTvPhP6kSW6eYZB-eGEhjT2mOiPQeSrZI7jRjUcf5uI_QuW/pub?gid=0&single=true&output=csv";
-
-let students = [];
-
-// 🔥 PERFECT CSV LOADER
-function loadData(){
-
-    Papa.parse(url, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results){
-
-            students = results.data;
-            console.log("DATA LOADED:", students);
-        }
+    rows.forEach(row => {
+        let cols = row.split(",");
+        html += "<tr>";
+        cols.forEach(col => {
+            html += "<td>" + col + "</td>";
+        });
+        html += "</tr>";
     });
 
-}
-
-// 🔍 SEARCH
-function search(){
-
-    let roll = document.getElementById("roll").value.trim();
-    let result = document.getElementById("result");
-
-    let s = students.find(x => String(x["ROLL"]).trim() == roll);
-
-    if(!s){
-        result.innerHTML = "<p style='color:red'>কোনো তথ্য পাওয়া যায়নি</p>";
-        return;
-    }
-
-    result.innerHTML = `
-    <div class="card">
-        <h3>নাম: ${s["CANDIDATE'S NAME"] || "N/A"}</h3>
-        <p>রোল: ${s["ROLL"] || "N/A"}</p>
-        <p>বিভাগ: ${s["GROUP TYPE"] || "N/A"}</p>
-        <p>বাংলা: ${s["বাংলা"] || "N/A"}</p>
-        <p>ইংরেজি: ${s["ইংরেজি"] || "N/A"}</p>
-        <p>আইসিটি: ${s["আইসিটি"] || "N/A"}</p>
-        <p>হিসাববিজ্ঞান: ${s["হিসাববিজ্ঞান"] || "N/A"}</p>
-        <p>ব্যবসায় সংগঠন: ${s["ব্যবসায় সংগঠন"] || "N/A"}</p>
-        <p>ব্যবস্থাপনা: ${s["ব্যবস্থাপনা"] || "N/A"}</p>
-        <p>ফিন্যান্স ব্যাংকিং: ${s["ফিন্যান্স ব্যাংকিং"] || "N/A"}</p>
-        <h3>মোট: ${s["মোট"] || "N/A"}</h3>
-    </div>
-    `;
-}
-
-loadData();
-setInterval(loadData, 10000);
-
+    html += "</table>";
+    document.getElementById("output").innerHTML = html;
+});
 </script>
 
 </body>
