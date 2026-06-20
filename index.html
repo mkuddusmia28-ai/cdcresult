@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>Student Result Search</title>
+<title>Student Search</title>
 
 <style>
 body{
@@ -18,27 +18,23 @@ body{
 input{
     padding:10px;
     width:250px;
-    border:1px solid #ccc;
-    border-radius:5px;
 }
 
 button{
     padding:10px 15px;
-    background:#28a745;
+    background:green;
     color:white;
     border:none;
-    border-radius:5px;
     cursor:pointer;
 }
 
 .card{
     background:white;
-    display:inline-block;
-    margin-top:20px;
     padding:20px;
-    border-radius:10px;
+    margin-top:20px;
+    display:inline-block;
     text-align:left;
-    min-width:300px;
+    border-radius:10px;
 }
 </style>
 </head>
@@ -46,58 +42,58 @@ button{
 <body>
 
 <div class="container">
-    <h2>Student Result Search</h2>
+<h2>Student Result Search</h2>
 
-    <input type="text" id="roll" placeholder="রোল লিখো">
-    <button onclick="searchStudent()">Search</button>
+<input type="text" id="roll" placeholder="রোল লিখো">
+<button onclick="search()">Search</button>
 
-    <div id="result"></div>
+<div id="result"></div>
 </div>
 
 <script>
 
-// 🔴 তোমার দেওয়া CSV লিংক
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6XYX-1NbB9VaFLmWKAi_Qjd5wy3_vWTTvPhP6kSW6eYZB-eGEhjT2mOiPQeSrZI7jRjUcf5uI_QuW/pub?gid=0&single=true&output=csv";
 
 let students = [];
 
-// 🔥 CSV load function (auto update support)
+// 🔥 CLEAN CSV PARSER (FIXED)
 async function loadData(){
-    try{
-        const res = await fetch(url + "&t=" + new Date().getTime());
-        const text = await res.text();
+    const res = await fetch(url + "&t=" + new Date().getTime());
+    const text = await res.text();
 
-        let rows = text.trim().split("\n");
-        let headers = rows[0].split(",");
+    let rows = text.trim().split("\n");
 
-        students = [];
+    // header clean করা
+    let headers = rows[0].split(",").map(h => h.trim().replace(/\r/g,""));
 
-        for(let i=1;i<rows.length;i++){
-            let values = rows[i].split(",");
-            let obj = {};
+    students = [];
 
-            headers.forEach((h,index)=>{
-                obj[h.trim()] = values[index] ? values[index].trim() : "N/A";
-            });
+    for(let i=1;i<rows.length;i++){
 
-            students.push(obj);
-        }
+        let values = rows[i].split(",");
 
-    }catch(err){
-        console.log("Error loading data:",err);
+        let obj = {};
+
+        headers.forEach((h,i2)=>{
+            obj[h] = values[i2] ? values[i2].trim() : "N/A";
+        });
+
+        students.push(obj);
     }
 }
 
-// 🔍 search function
-function searchStudent(){
+// 🔍 SEARCH FIXED
+function search(){
 
     let roll = document.getElementById("roll").value.trim();
     let result = document.getElementById("result");
 
-    let s = students.find(x => x["ROLL"] == roll);
+    console.log(students); // debug
+
+    let s = students.find(x => String(x["ROLL"]).trim() == roll);
 
     if(!s){
-        result.innerHTML = "<p style='color:red'>কোনো ডাটা পাওয়া যায়নি</p>";
+        result.innerHTML = "<p style='color:red'>কোনো তথ্য পাওয়া যায়নি</p>";
         return;
     }
 
@@ -118,7 +114,6 @@ function searchStudent(){
     `;
 }
 
-// 🚀 প্রথমবার load + auto refresh
 loadData();
 setInterval(loadData, 10000);
 
