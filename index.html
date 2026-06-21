@@ -3,43 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>পরীক্ষার ফলাফল</title>
+<title>ফলাফল সিস্টেম</title>
 
 <style>
 body{
-    font-family: SolaimanLipi, Arial, sans-serif;
+    font-family: Arial;
     background:#f4f6f9;
-    margin:0;
     padding:20px;
 }
 .container{
-    max-width:900px;
+    max-width:800px;
     margin:auto;
     background:white;
     padding:20px;
     border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,.1);
 }
-h2{
-    text-align:center;
-    color:#0066cc;
-}
+h2{text-align:center;color:#0066cc;}
 input{
     width:70%;
-    padding:12px;
-    border:1px solid #ccc;
-    border-radius:5px;
+    padding:10px;
 }
 button{
-    padding:12px 20px;
+    padding:10px 15px;
     background:#0066cc;
     color:white;
     border:none;
-    border-radius:5px;
     cursor:pointer;
-}
-button:hover{
-    background:#004a99;
 }
 table{
     width:100%;
@@ -49,57 +38,56 @@ table{
 th,td{
     border:1px solid #ddd;
     padding:10px;
-    text-align:left;
 }
 th{
     background:#0066cc;
     color:white;
 }
-.result{
-    margin-top:20px;
-}
-.error{
-    color:red;
-    font-weight:bold;
-}
+.error{color:red;font-weight:bold;}
 </style>
 </head>
 <body>
 
 <div class="container">
 
-<h2>📚 পরীক্ষার ফলাফল</h2>
+<h2>📚 ফলাফল দেখুন</h2>
 
-<input type="text" id="roll" placeholder="রোল নম্বর লিখুন">
+<input type="text" id="roll" placeholder="রোল লিখুন">
 <button onclick="searchResult()">সার্চ</button>
 
-<div id="result" class="result"></div>
+<div id="result"></div>
 
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script>
+
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRICJ21HGMb_MmipR-RKlbZ1riWooVL3hIBl4H0cezqVAqdRcVOy5VO_WbFdF1WeeKta4v4Fw1QOOhc/pub?gid=0&single=true&output=csv";
 
 let students = [];
 
+// CSV load
 Papa.parse(csvUrl, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-        students = results.data;
-        console.log(students);
+    download:true,
+    header:true,
+    skipEmptyLines:true,
+    complete:function(res){
+        students = res.data;
     }
 });
 
-function searchResult() {
+// clean function (important fix)
+function clean(value){
+    return String(value || "").trim();
+}
 
-    const roll = document.getElementById("roll").value.trim();
+function searchResult(){
 
-    const student = students.find(row =>
-        String(row["রোল"]).trim() === roll
+    const roll = clean(document.getElementById("roll").value);
+
+    const student = students.find(s =>
+        clean(s["রোল"]) === roll
     );
 
     const result = document.getElementById("result");
@@ -110,37 +98,35 @@ function searchResult() {
         <h3>শিক্ষার্থীর তথ্য</h3>
 
         <table>
-            <tr><th>তথ্য</th><th>বিবরণ</th></tr>
-            <tr><td>রোল</td><td>${student["রোল"] || ""}</td></tr>
-            <tr><td>নাম</td><td>${student["নাম"] || ""}</td></tr>
-            <tr><td>বিভাগ</td><td>${student["বিভাগ"] || ""}</td></tr>
+            <tr><th>বিষয়</th><th>মান</th></tr>
+            <tr><td>রোল</td><td>${clean(student["রোল"])}</td></tr>
+            <tr><td>নাম</td><td>${clean(student["নাম"])}</td></tr>
+            <tr><td>বিভাগ</td><td>${clean(student["বিভাগ"])}</td></tr>
         </table>
 
         <h3>বিষয়ভিত্তিক নম্বর</h3>
 
         <table>
             <tr><th>বিষয়</th><th>নম্বর</th></tr>
-            <tr><td>বাংলা</td><td>${student["বাংলা"] || ""}</td></tr>
-            <tr><td>ইংরেজী</td><td>${student["ইংরেজী"] || ""}</td></tr>
-            <tr><td>আইসিটি</td><td>${student["আইসিটি"] || ""}</td></tr>
-            <tr><td>হিসাব বিজ্ঞান</td><td>${student["হিসাব বিজ্ঞান"] || ""}</td></tr>
-            <tr><td>ব্যবস্থাপনা</td><td>${student["ব্যবস্থাপনা"] || ""}</td></tr>
-            <tr><td>ব্যব. সংগঠন</td><td>${student["ব্যব. সংগঠন"] || ""}</td></tr>
-            <tr><td>ফিনান্স ব্যাংকিং</td><td>${student["ফিনান্স ব্যাংকিং"] || ""}</td></tr>
+            <tr><td>বাংলা</td><td>${clean(student["বাংলা"])}</td></tr>
+            <tr><td>ইংরেজী</td><td>${clean(student["ইংরেজী"])}</td></tr>
+            <tr><td>আইসিটি</td><td>${clean(student["আইসিটি"])}</td></tr>
+            <tr><td>হিসাব বিজ্ঞান</td><td>${clean(student["হিসাব বিজ্ঞান"])}</td></tr>
+            <tr><td>ব্যবস্থাপনা</td><td>${clean(student["ব্যবস্থাপনা"])}</td></tr>
+            <tr><td>ব্যব. সংগঠন</td><td>${clean(student["ব্যব. সংগঠন"])}</td></tr>
+            <tr><td>ফিনান্স ব্যাংকিং</td><td>${clean(student["ফিনান্স ব্যাংকিং"])}</td></tr>
             <tr>
                 <th>মোট</th>
-                <th>${student["মোট"] || ""}</th>
+                <th>${clean(student["মোট"])}</th>
             </tr>
         </table>
         `;
 
     } else {
-
-        result.innerHTML =
-        "<p class='error'>❌ এই রোল নম্বরের কোনো ফলাফল পাওয়া যায়নি।</p>";
-
+        result.innerHTML = "<p class='error'>❌ রোল পাওয়া যায়নি</p>";
     }
 }
+
 </script>
 
 </body>
