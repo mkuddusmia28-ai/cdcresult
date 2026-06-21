@@ -1,32 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
-  <title>CSV Data</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পরীক্ষার ফলাফল</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    padding:20px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+    text-align:center;
+    color:#0066cc;
+}
+
+input{
+    width:70%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    padding:10px 20px;
+    background:#0066cc;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#004c99;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+table, th, td{
+    border:1px solid #ddd;
+}
+
+th{
+    background:#0066cc;
+    color:white;
+    padding:10px;
+}
+
+td{
+    padding:10px;
+}
+
+.result{
+    margin-top:20px;
+}
+</style>
 </head>
 <body>
 
-<h2>Student Data</h2>
-<div id="output"></div>
+<div class="container">
+    <h2>📚 পরীক্ষার ফলাফল</h2>
+
+    <input type="text" id="roll" placeholder="রোল নম্বর লিখুন">
+    <button onclick="searchResult()">সার্চ</button>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script>
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6XYX-1NbB9VaFLmWKAi_Qjd5wy3_vWTTvPhP6kSW6eYZB-eGEhjT2mOiPQeSrZI7jRjUcf5uI_QuW/pub?output=csv")
-.then(res => res.text())
-.then(data => {
-    let rows = data.split("\n");
-    let html = "<table border='1'>";
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRICJ21HGMb_MmipR-RKlbZ1riWooVL3hIBl4H0cezqVAqdRcVOy5VO_WbFdF1WeeKta4v4Fw1QOOhc/pub?gid=0&single=true&output=csv";
 
-    rows.forEach(row => {
-        let cols = row.split(",");
-        html += "<tr>";
-        cols.forEach(col => {
-            html += "<td>" + col + "</td>";
-        });
-        html += "</tr>";
-    });
+let students = [];
 
-    html += "</table>";
-    document.getElementById("output").innerHTML = html;
+Papa.parse(csvUrl, {
+    download: true,
+    header: true,
+    complete: function(results) {
+        students = results.data;
+    }
 });
+
+function searchResult() {
+    const roll = document.getElementById("roll").value.trim();
+
+    const student = students.find(
+        s => String(s["রোল"]).trim() === roll
+    );
+
+    const resultDiv = document.getElementById("result");
+
+    if(student){
+
+        resultDiv.innerHTML = `
+        <h3>শিক্ষার্থীর তথ্য</h3>
+
+        <table>
+            <tr><th>তথ্য</th><th>মান</th></tr>
+            <tr><td>রোল</td><td>${student["রোল"]}</td></tr>
+            <tr><td>নাম</td><td>${student["নাম"]}</td></tr>
+            <tr><td>বিভাগ</td><td>${student["বিভাগ"]}</td></tr>
+        </table>
+
+        <h3>বিষয়ভিত্তিক নম্বর</h3>
+
+        <table>
+            <tr><th>বিষয়</th><th>নম্বর</th></tr>
+            <tr><td>বাংলা</td><td>${student["বাংলা"]}</td></tr>
+            <tr><td>ইংরেজি</td><td>${student["ইংরেজি"]}</td></tr>
+            <tr><td>গণিত</td><td>${student["গণিত"]}</td></tr>
+            <tr><td>বিজ্ঞান</td><td>${student["বিজ্ঞান"]}</td></tr>
+            <tr><th>মোট</th><th>${student["মোট"]}</th></tr>
+        </table>
+        `;
+
+    } else {
+        resultDiv.innerHTML = "<p style='color:red'>কোনো ফলাফল পাওয়া যায়নি!</p>";
+    }
+}
 </script>
 
 </body>
