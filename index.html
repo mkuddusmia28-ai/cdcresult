@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ফলাফল সিস্টেম</title>
+<title>পরীক্ষার ফলাফল</title>
 
 <style>
 body{
@@ -12,9 +12,9 @@ body{
     padding:20px;
 }
 .container{
-    max-width:850px;
+    max-width:800px;
     margin:auto;
-    background:#fff;
+    background:white;
     padding:20px;
     border-radius:10px;
     box-shadow:0 0 10px rgba(0,0,0,0.1);
@@ -64,7 +64,7 @@ th{
 
 <h2>📚 পরীক্ষার ফলাফল</h2>
 
-<input type="text" id="roll" placeholder="রোল নম্বর লিখুন">
+<input type="text" id="roll" placeholder="রোল লিখুন">
 <button onclick="searchResult()">সার্চ</button>
 
 <div id="result"></div>
@@ -75,7 +75,8 @@ th{
 
 <script>
 
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRICJ21HGMb_MmipR-RKlbZ1riWooVL3hIBl4H0cezqVAqdRcVOy5VO_WbFdF1WeeKta4v4Fw1QOOhc/pub?gid=0&single=true&output=csv";
+// ✅ FIXED CSV LINK
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRICJ21HGMb_MmipR-RKlbZ1riWooVL3hIBl4H0cezqVAqdRcVOy5VO_WbFdF1WeeKta4v4Fw1QOOhc/pub?output=csv";
 
 let students = [];
 
@@ -85,20 +86,30 @@ Papa.parse(csvUrl, {
     header: true,
     skipEmptyLines: true,
 
-    transformHeader: h => h.trim(), // 🔥 header fix
+    transformHeader: h => h.trim(),
 
     complete: function(res){
         students = res.data;
-        console.log("Data Loaded", students);
+        console.log("Data Loaded:", students);
+    },
+
+    error: function(err){
+        console.log("CSV Load Error:", err);
     }
 });
 
-// clean function
+// Clean function
 function clean(v){
     return String(v || "").trim();
 }
 
+// Search function
 function searchResult(){
+
+    if(students.length === 0){
+        alert("ডাটা লোড হচ্ছে... একটু অপেক্ষা করুন");
+        return;
+    }
 
     const roll = clean(document.getElementById("roll").value);
 
